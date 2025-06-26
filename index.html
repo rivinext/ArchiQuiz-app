@@ -1,13 +1,990 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>ArchiQuiz</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズサイト</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ログインセクションは削除されたため、関連スタイルは不要になりますが、念のため残しておきます */
+        .login-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            display: none; /* 常に非表示 */
+        }
+
+        .login-section h2 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .login-info {
+            color: #6c757d;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .google-login-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .google-login-btn:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(66, 133, 244, 0.3);
+        }
+
+        .user-info {
+            display: none; /* 常に非表示 */
+            align-items: center;
+            justify-content: space-between;
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .setup-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .setup-section h2 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-logout {
+            background: #6c757d;
+            padding: 8px 20px;
+            font-size: 14px;
+        }
+
+        .btn-logout:hover {
+            background: #5a6268;
+        }
+
+        .category-selection {
+            margin-bottom: 30px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .category-btn {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-btn.selected {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .quiz-section {
+            display: none;
+        }
+
+        .question-card {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .answer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            background: #fff;
+            border: 3px solid #e9ecef;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .answer-btn.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .answer-btn.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .answer-btn.unknown {
+            background: #ffc107;
+            color: #000;
+            border-color: #ffc107;
+        }
+
+        .answer-btn.selected {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .result {
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result.correct {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .result.incorrect {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
+
+        .result.unknown {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: #000;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .score-breakdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .score-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .score-item.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-item.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .score-item.unknown {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #f1b2b8;
+        }
+
+        .review-section {
+            margin-top: 30px;
+        }
+
+        .review-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .review-tab {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .review-tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .review-content {
+            display: none;
+        }
+
+        .review-content.active {
+            display: block;
+        }
+
+        .review-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .data-save-info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #155724;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .answer-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .answer-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .score-breakdown {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>四択クイズ：ArchiQuiz</h1>
-  <div id="quiz-container"></div>
-  <script src="script.js"></script>
+    <div class="container">
+        <h1>🧠 クイズサイト</h1>
+
+        <div class="setup-section">
+            <h2>🔧 スプレッドシート設定</h2>
+            <div class="input-group">
+                <label for="spreadsheet-url">スプレッドシートURL:</label>
+                <input type="text" id="spreadsheet-url" placeholder="https://docs.google.com/spreadsheets/d/...">
+            </div>
+            <button class="btn" onclick="loadSpreadsheet()">データを読み込む</button>
+        </div>
+
+        <div id="category-section" class="category-selection" style="display: none;">
+            <h2>📂 カテゴリを選択</h2>
+            <div id="categories" class="category-grid"></div>
+            <button class="btn" onclick="startQuiz()" id="start-quiz-btn" disabled>クイズを開始</button>
+        </div>
+
+        <div id="quiz-section" class="quiz-section">
+            <div class="score">
+                <span id="current-question">1</span> / <span id="total-questions">0</span> 問目
+            </div>
+
+            <div class="score-breakdown">
+                <div class="score-item correct">
+                    正解: <span id="correct-count">0</span>
+                </div>
+                <div class="score-item incorrect">
+                    不正解: <span id="incorrect-count">0</span>
+                </div>
+                <div class="score-item unknown">
+                    わからない: <span id="unknown-count">0</span>
+                </div>
+            </div>
+
+            <div id="question-container"></div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="nextQuestion()" id="next-btn" style="display: none;">次の問題</button>
+                <button class="btn" onclick="showResults()" id="finish-btn" style="display: none;">結果を見る</button>
+            </div>
+        </div>
+
+        <div id="results-section" style="display: none;">
+            <h2>🎉 結果発表</h2>
+            <div id="final-score" class="score"></div>
+
+            <div class="review-section">
+                <div class="review-tabs">
+                    <div class="review-tab active" onclick="showReviewTab('all')">全問題</div>
+                    <div class="review-tab" onclick="showReviewTab('incorrect')">間違った問題</div>
+                    <div class="review-tab" onclick="showReviewTab('unknown')">わからない問題</div>
+                </div>
+
+                <div id="review-all" class="review-content active"></div>
+                <div id="review-incorrect" class="review-content"></div>
+                <div id="review-unknown" class="review-content"></div>
+            </div>
+
+            <div id="data-save-status" class="data-save-info" style="display: none;"></div>
+
+            <button class="btn" onclick="restartQuiz()">もう一度挑戦</button>
+        </div>
+    </div>
+
+    <script>
+        let quizData = [];
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let unknownCount = 0;
+        let selectedCategories = new Set();
+        let userAnswers = [];
+        // let currentUser = null; // Googleログイン機能削除のため、この変数は不要
+        let selectedAnswer = null;
+
+        // Google Sign-In の初期化関連の関数はすべて削除
+
+        function extractSpreadsheetId(url) {
+            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            return match ? match[1] : null;
+        }
+
+        async function loadSpreadsheet() {
+                    const url = document.getElementById('spreadsheet-url').value;
+                    if (!url) {
+                        alert('スプレッドシートのURLを入力してください。');
+                        return;
+                    }
+
+                    const spreadsheetId = extractSpreadsheetId(url);
+                    if (!spreadsheetId) {
+                        alert('正しいスプレッドシートのURLを入力してください。');
+                        return;
+                    }
+
+                    try {
+                        // 【ここがあなたが変更を加える主要な部分です】
+                        // 実際のスプレッドシートデータを読み込むためには、Google Apps Script を使ってデータをJSON形式で返すWebアプリを作成し、
+                        // そのWebアプリのURLをここに記述する必要があります。
+                        // ★★★★ 以下の 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL' を、ステップ1でコピーしたURLに置き換えてください ★★★★
+                        const googleAppsScriptUrl = `https://script.google.com/macros/s/AKfycbyYVRB6XbwApxTiYiZDjeUzwzs7yDj_ykZGBPYIvDkDQb6xa7A4yiZ_c97H6LcSJgQi/exec?spreadsheetId=${spreadsheetId}`;
+
+                        const response = await fetch(googleAppsScriptUrl);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        parseSpreadsheetData(data);
+
+                        // --- 以前のデモ用サンプルデータ（コメントアウトまたは削除してください） ---
+                        /*
+                        const sampleData = [
+                            ['カテゴリ', '問題', '○ or ×', '解説'],
+                            ['計画', '1月は英語でJanuary', '○', 'January'],
+                            ['環境・設備', '2月は英語でたんぽぽ', '×', 'February'],
+                            // ... 続きのサンプルデータ ...
+                        ];
+                        parseSpreadsheetData(sampleData);
+                        */
+
+                    } catch (error) {
+                        console.error('データの読み込みに失敗しました:', error);
+                        document.getElementById('quiz-section').innerHTML =
+                            '<div class="error">データの読み込みに失敗しました。スプレッドシートが公開されているか、URLが正しいか確認してください。</div>';
+                    }
+                }
+
+        function parseSpreadsheetData(data) {
+                            console.log('--- parseSpreadsheetData が呼び出されました ---');
+                            console.log('Apps Scriptから受け取った生データ:', data); // ★追加
+
+                            quizData = [];
+                            const categories = new Set();
+
+                            if (!data || data.length === 0) {
+                                console.warn('受け取ったデータが空か無効です。'); // ★追加
+                                document.getElementById('quiz-section').innerHTML =
+                                    '<div class="error">スプレッドシートから有効なデータが読み込めませんでした。</div>';
+                                return; // ★追加
+                            }
+
+                            // ヘッダー行をスキップする前に、データが十分な行数を持っているか確認
+                            if (data.length < 2) { // ヘッダー行と少なくとも1つのデータ行が必要
+                                console.warn('データが少なすぎます。ヘッダーとデータ行が不足している可能性があります。'); // ★追加
+                                document.getElementById('quiz-section').innerHTML =
+                                    '<div class="error">スプレッドシートにクイズデータが不足しています。</div>';
+                                return; // ★追加
+                            }
+
+
+                            for (let i = 1; i < data.length; i++) {
+                                const row = data[i];
+                                console.log(`処理中の行 ${i}:`, row); // ★追加
+                                if (row.length >= 4) {
+                                    const category = row[0];
+                                    const question = row[1];
+                                    const answer = row[2];
+                                    const explanation = row[3];
+
+                                    if (category && question && answer && explanation) {
+                                        quizData.push({
+                                            category: category,
+                                            question: question,
+                                            answer: answer,
+                                            explanation: explanation
+                                        });
+                                        categories.add(category);
+                                        console.log(`行 ${i} が有効なクイズデータとして追加されました。`); // ★追加
+                                    } else {
+                                        console.warn(`行 ${i} は必要なデータ（カテゴリ、問題、○or×、解説）が不足しているためスキップされました:`, row); // ★追加
+                                    }
+                                } else {
+                                    console.warn(`行 ${i} は列数が不足しているためスキップされました (最低4列必要):`, row); // ★追加
+                                }
+                            }
+
+                            console.log('最終的なquizDataの数:', quizData.length); // ★追加
+                            console.log('抽出されたカテゴリ:', Array.from(categories)); // ★追加
+
+                            displayCategories(Array.from(categories));
+                            // quizDataが空の場合、カテゴリが表示されないため、その旨を伝えるメッセージを追加
+                            if (quizData.length === 0) { // ★追加
+                                 document.getElementById('quiz-section').innerHTML =
+                                    '<div class="error">スプレッドシートから有効なクイズデータが抽出されませんでした。<br>スプレッドシートの1行目にヘッダー、2行目以降に「カテゴリ」「問題」「○ or ×」「解説」が全て入力されているか確認してください。</div>';
+                            } // ★追加
+                        }
+
+        function displayCategories(categories) {
+            const categoriesContainer = document.getElementById('categories');
+            categoriesContainer.innerHTML = '';
+
+            categories.forEach(category => {
+                const categoryBtn = document.createElement('div');
+                categoryBtn.className = 'category-btn';
+                categoryBtn.textContent = category;
+                categoryBtn.onclick = () => toggleCategory(category, categoryBtn);
+                categoriesContainer.appendChild(categoryBtn);
+            });
+
+            document.getElementById('category-section').style.display = 'block';
+        }
+
+        function toggleCategory(category, btnElement) {
+            if (selectedCategories.has(category)) {
+                selectedCategories.delete(category);
+                btnElement.classList.remove('selected');
+            } else {
+                selectedCategories.add(category);
+                btnElement.classList.add('selected');
+            }
+
+            document.getElementById('start-quiz-btn').disabled = selectedCategories.size === 0;
+        }
+
+        function startQuiz() {
+            if (selectedCategories.size === 0) {
+                alert('カテゴリを選択してください。');
+                return;
+            }
+
+            currentQuestions = quizData.filter(q => selectedCategories.has(q.category));
+
+            if (currentQuestions.length === 0) {
+                alert('選択されたカテゴリに問題がありません。');
+                return;
+            }
+
+            currentQuestions = currentQuestions.sort(() => Math.random() - 0.5);
+
+            currentQuestionIndex = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            unknownCount = 0;
+            userAnswers = [];
+
+            document.getElementById('total-questions').textContent = currentQuestions.length;
+            updateScoreCounts();
+
+            document.getElementById('category-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            const container = document.getElementById('question-container');
+
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-text">${question.question}</div>
+                    <div class="answer-buttons">
+                        <button class="answer-btn" onclick="selectAnswer('○', this)">○ 正しい</button>
+                        <button class="answer-btn" onclick="selectAnswer('×', this)">× 間違い</button>
+                        <button class="answer-btn" onclick="selectAnswer('?', this)">? わからない</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('finish-btn').style.display = 'none';
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(answer, buttonElement) {
+            if (selectedAnswer) return; // 既に回答済みの場合は何もしない
+
+            selectedAnswer = answer;
+            const question = currentQuestions[currentQuestionIndex];
+
+            // 全てのボタンを無効化
+            const allButtons = document.querySelectorAll('.answer-btn');
+            allButtons.forEach(btn => btn.style.pointerEvents = 'none');
+
+            let isCorrect = false;
+            let resultClass = '';
+
+            if (answer === '?') {
+                // わからない
+                unknownCount++;
+                resultClass = 'unknown';
+                buttonElement.classList.add('unknown');
+            } else if (answer === question.answer) {
+                // 正解
+                correctCount++;
+                isCorrect = true;
+                resultClass = 'correct';
+                buttonElement.classList.add('correct');
+            } else {
+                // 不正解
+                incorrectCount++;
+                resultClass = 'incorrect';
+                buttonElement.classList.add('incorrect');
+
+                // 正解のボタンも表示
+                allButtons.forEach(btn => {
+                    if (btn.textContent.includes(question.answer)) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            updateScoreCounts();
+
+            userAnswers.push({
+                question: question.question,
+                userAnswer: answer,
+                correctAnswer: question.answer,
+                explanation: question.explanation,
+                isCorrect: isCorrect,
+                isUnknown: answer === '?',
+                category: question.category
+            });
+
+            showResult(answer, question.explanation, resultClass);
+
+            // 次の問題ボタンまたは結果ボタンを表示
+            setTimeout(() => {
+                if (currentQuestionIndex < currentQuestions.length - 1) {
+                    document.getElementById('next-btn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('finish-btn').style.display = 'inline-block';
+                }
+            }, 1000);
+        }
+
+        function showResult(userAnswer, explanation, resultClass) {
+            const container = document.getElementById('question-container');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${resultClass}`;
+
+            let resultText = '';
+            if (userAnswer === '?') {
+                resultText = 'わからない問題として記録しました';
+            } else if (resultClass === 'correct') {
+                resultText = '正解！';
+            } else {
+                resultText = '不正解';
+            }
+
+            resultDiv.innerHTML = `
+                <strong>${resultText}</strong><br>
+                解説: ${explanation}
+            `;
+            container.appendChild(resultDiv);
+        }
+
+        function updateScoreCounts() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = incorrectCount;
+            document.getElementById('unknown-count').textContent = unknownCount;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function showResults() {
+            const total = currentQuestions.length;
+            const percentage = Math.round((correctCount / total) * 100);
+
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+
+            document.getElementById('final-score').innerHTML = `
+                <div class="score-breakdown">
+                    <div class="score-item correct">
+                        <strong>正解</strong><br>${correctCount}問
+                    </div>
+                    <div class="score-item incorrect">
+                        <strong>不正解</strong><br>${incorrectCount}問
+                    </div>
+                    <div class="score-item unknown">
+                        <strong>わからない</strong><br>${unknownCount}問
+                    </div>
+                </div>
+                <h3>正答率: ${percentage}%</h3>
+            `;
+
+            generateReviewContent();
+
+            // データ保存 (ログイン状態に関わらず保存を試みます)
+            saveUserData();
+        }
+
+        function generateReviewContent() {
+            const allReview = document.getElementById('review-all');
+            const incorrectReview = document.getElementById('review-incorrect');
+            const unknownReview = document.getElementById('review-unknown');
+
+            // 全問題
+            let allHTML = '';
+            userAnswers.forEach((answer, index) => {
+                const statusClass = answer.isUnknown ? 'unknown' : (answer.isCorrect ? 'correct' : 'incorrect');
+                const statusText = answer.isUnknown ? 'わからない' : (answer.isCorrect ? '正解' : '不正解');
+
+                allHTML += `
+                    <div class="review-item">
+                        <strong>問題 ${index + 1} [${answer.category}] - ${statusText}</strong><br>
+                        <strong>問題:</strong> ${answer.question}<br>
+                        <strong>あなたの回答:</strong> ${answer.userAnswer} |
+                        <strong>正解:</strong> ${answer.correctAnswer}<br>
+                        <strong>解説:</strong> ${answer.explanation}
+                    </div>
+                `;
+            });
+            allReview.innerHTML = allHTML;
+
+            // 間違った問題
+            const incorrectAnswers = userAnswers.filter(a => !a.isCorrect && !a.isUnknown);
+            let incorrectHTML = incorrectAnswers.length > 0 ? '' : '<p>間違った問題はありません！</p>';
+            incorrectAnswers.forEach((answer, index) => {
+                incorrectHTML += `
+                    <div class="review-item">
+                        <strong>問題 ${index + 1} [${answer.category}]</strong><br>
+                        <strong>問題:</strong> ${answer.question}<br>
+                        <strong>あなたの回答:</strong> ${answer.userAnswer} |
+                        <strong>正解:</strong> ${answer.correctAnswer}<br>
+                        <strong>解説:</strong> ${answer.explanation}
+                    </div>
+                `;
+            });
+            incorrectReview.innerHTML = incorrectHTML;
+
+            // わからない問題
+            const unknownAnswers = userAnswers.filter(a => a.isUnknown);
+            let unknownHTML = unknownAnswers.length > 0 ? '' : '<p>わからない問題はありません！</p>';
+            unknownAnswers.forEach((answer, index) => {
+                unknownHTML += `
+                    <div class="review-item">
+                        <strong>問題 ${index + 1} [${answer.category}]</strong><br>
+                        <strong>問題:</strong> ${answer.question}<br>
+                        <strong>正解:</strong> ${answer.correctAnswer}<br>
+                        <strong>解説:</strong> ${answer.explanation}
+                    </div>
+                `;
+            });
+            unknownReview.innerHTML = unknownHTML;
+        }
+
+        function showReviewTab(tab) {
+            // タブの切り替え
+            document.querySelectorAll('.review-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.review-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`review-${tab}`).classList.add('active');
+        }
+
+        function saveUserData() {
+            // Googleログイン機能削除のため、currentUserによる条件分岐は不要になりました。
+            // データは常に匿名ユーザーとして保存されます。
+            const userData = {
+                userId: 'anonymous_user', // 固定の匿名ユーザーID
+                timestamp: new Date().toISOString(),
+                categories: Array.from(selectedCategories),
+                totalQuestions: currentQuestions.length,
+                correctCount: correctCount,
+                incorrectCount: incorrectCount,
+                unknownCount: unknownCount,
+                percentage: Math.round((correctCount / currentQuestions.length) * 100),
+                answers: userAnswers
+            };
+
+            // ここではローカルストレージにデモ保存（実際の運用ではサーバサイドのデータベースを推奨）
+            try {
+                const existingData = JSON.parse(localStorage.getItem('quizData') || '[]');
+                existingData.push(userData);
+                localStorage.setItem('quizData', JSON.stringify(existingData));
+
+                document.getElementById('data-save-status').style.display = 'block';
+                document.getElementById('data-save-status').innerHTML = `
+                    ✅ データが保存されました！<br>
+                    <small>このデータはブラウザのローカルストレージに保存されています</small>
+                `;
+            } catch (error) {
+                console.error('データ保存エラー:', error);
+                document.getElementById('data-save-status').style.display = 'block';
+                document.getElementById('data-save-status').innerHTML = `
+                    ⚠️ データの保存に失敗しました<br>
+                    <small>ローカルストレージへの保存中にエラーが発生しました</small>
+                `;
+            }
+        }
+
+        function restartQuiz() {
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('category-section').style.display = 'block';
+
+            // カテゴリの選択をリセット
+            selectedCategories.clear();
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.getElementById('start-quiz-btn').disabled = true;
+        }
+
+        // ページ読み込み時の初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            // initGoogleSignIn(); // Googleログイン機能削除のため、この呼び出しは削除
+            console.log('クイズサイトが読み込まれました！');
+
+            // デモ用: 保存されたデータがあるかチェック
+            try {
+                const savedData = localStorage.getItem('quizData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    console.log('保存されたデータ:', data);
+                }
+            } catch (error) {
+                console.log('保存データの読み込みエラー:', error);
+            }
+        });
+
+        // 実際のプロジェクトで使用する関数例 (Googleログイン機能削除後は不要であれば削除可)
+        function saveToGoogleSheets(userData) {
+            // Google Apps Script Web Appエンドポイント
+            const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL'; // ★ここにあなたのGoogle Apps ScriptのURLを設定してください
+
+            fetch(scriptUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('データがGoogle Sheetsに保存されました:', data);
+            })
+            .catch(error => {
+                console.error('保存エラー:', error);
+            });
+        }
+
+        function saveToFirestore(userData) {
+            // Firebase Firestore への保存例 (Firebase SDKのインポートと設定が必要)
+            // 実際の実装では firebase/firestore をインポートして使用
+            /*
+            import { collection, addDoc } from 'firebase/firestore';
+
+            const docRef = await addDoc(collection(db, 'quizResults'), userData);
+            console.log('Document written with ID: ', docRef.id);
+            */
+        }
+    </script>
 </body>
 </html>
